@@ -2,6 +2,7 @@ package main.java.com.redis.redisinaction;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ZParams;
+
 import java.util.*;
 
 public class Chapter01 {
@@ -18,11 +19,11 @@ public class Chapter01 {
         conn.select(15);
 
         String articleId = postArticle(
-            conn, "username", "A title", "http://www.google.com");
+                conn, "username", "A title", "http://www.google.com");
         System.out.println("We posted a new article with id: " + articleId);
         System.out.println("Its HASH looks like:");
-        Map<String,String> articleData = conn.hgetAll("article:" + articleId);
-        for (Map.Entry<String,String> entry : articleData.entrySet()){
+        Map<String, String> articleData = conn.hgetAll("article:" + articleId);
+        for (Map.Entry<String, String> entry : articleData.entrySet()) {
             System.out.println("  " + entry.getKey() + ": " + entry.getValue());
         }
 
@@ -34,7 +35,7 @@ public class Chapter01 {
         assert Integer.parseInt(votes) > 1;
 
         System.out.println("The currently highest-scoring articles are:");
-        List<Map<String,String>> articles = getArticles(conn, 1);
+        List<Map<String, String>> articles = getArticles(conn, 1);
         printArticles(articles);
         assert articles.size() >= 1;
 
@@ -54,7 +55,7 @@ public class Chapter01 {
 
         long now = System.currentTimeMillis() / 1000;
         String article = "article:" + articleId;
-        HashMap<String,String> articleData = new HashMap<String,String>();
+        HashMap<String, String> articleData = new HashMap<String, String>();
         articleData.put("title", title);
         articleData.put("link", link);
         articleData.put("user", user);
@@ -69,7 +70,7 @@ public class Chapter01 {
 
     public void articleVote(Jedis conn, String user, String article) {
         long cutoff = (System.currentTimeMillis() / 1000) - ONE_WEEK_IN_SECONDS;
-        if (conn.zscore("time:", article) < cutoff){
+        if (conn.zscore("time:", article) < cutoff) {
             return;
         }
 
@@ -81,18 +82,18 @@ public class Chapter01 {
     }
 
 
-    public List<Map<String,String>> getArticles(Jedis conn, int page) {
+    public List<Map<String, String>> getArticles(Jedis conn, int page) {
         return getArticles(conn, page, "score:");
     }
 
-    public List<Map<String,String>> getArticles(Jedis conn, int page, String order) {
+    public List<Map<String, String>> getArticles(Jedis conn, int page, String order) {
         int start = (page - 1) * ARTICLES_PER_PAGE;
         int end = start + ARTICLES_PER_PAGE - 1;
 
         Set<String> ids = conn.zrevrange(order, start, end);
-        List<Map<String,String>> articles = new ArrayList<Map<String,String>>();
-        for (String id : ids){
-            Map<String,String> articleData = conn.hgetAll(id);
+        List<Map<String, String>> articles = new ArrayList<Map<String, String>>();
+        for (String id : ids) {
+            Map<String, String> articleData = conn.hgetAll(id);
             articleData.put("id", id);
             articles.add(articleData);
         }
@@ -107,11 +108,11 @@ public class Chapter01 {
         }
     }
 
-    public List<Map<String,String>> getGroupArticles(Jedis conn, String group, int page) {
+    public List<Map<String, String>> getGroupArticles(Jedis conn, String group, int page) {
         return getGroupArticles(conn, group, page, "score:");
     }
 
-    public List<Map<String,String>> getGroupArticles(Jedis conn, String group, int page, String order) {
+    public List<Map<String, String>> getGroupArticles(Jedis conn, String group, int page, String order) {
         String key = order + group;
         if (!conn.exists(key)) {
             ZParams params = new ZParams().aggregate(ZParams.Aggregate.MAX);
@@ -121,11 +122,11 @@ public class Chapter01 {
         return getArticles(conn, page, key);
     }
 
-    private void printArticles(List<Map<String,String>> articles){
-        for (Map<String,String> article : articles){
+    private void printArticles(List<Map<String, String>> articles) {
+        for (Map<String, String> article : articles) {
             System.out.println("  id: " + article.get("id"));
-            for (Map.Entry<String,String> entry : article.entrySet()){
-                if (entry.getKey().equals("id")){
+            for (Map.Entry<String, String> entry : article.entrySet()) {
+                if (entry.getKey().equals("id")) {
                     continue;
                 }
                 System.out.println("    " + entry.getKey() + ": " + entry.getValue());
