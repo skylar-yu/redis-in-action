@@ -14,6 +14,24 @@ public class Chapter01 {
         new Chapter01().run();
     }
 
+    /**
+     * 数据结构：
+     *   *文章已投票用户集合（防止重复投票）set
+     *   *文章的详情  hash
+     *   *文章发布时间集合  zset
+     *   *文章得分集合   zset
+     * 1、某用户新发布一篇文章、默认的投票数为1
+     *     1.1  sadd
+     *     1.2  hmset
+     *     1.3  zadd
+     *     1.4  zadd
+     * 2、给用户给新发布的文章投票（只能投票，发布时间七天以内的）
+     *      if(sadd(username))
+     *
+     * 3、根据总得分，获取第一页的所有文章的信息
+     *
+     * 4、使用群组队文章进行分类
+     */
     public void run() {
         Jedis conn = new Jedis("localhost");
         conn.select(15);
