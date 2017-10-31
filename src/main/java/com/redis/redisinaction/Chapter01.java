@@ -33,7 +33,7 @@ public class Chapter01 {
      * 4、使用群组队文章进行分类
      */
     public void run() {
-        Jedis conn = new Jedis("localhost");
+        Jedis conn = new Jedis("172.21.107.126");
         conn.select(15);
 
         String articleId = postArticle(
