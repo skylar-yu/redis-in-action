@@ -63,7 +63,7 @@ public class Chapter01 {
         printArticles(articles);
         assert articles.size() >= 1;
     }
-
+    //发布一篇文章
     public String postArticle(Jedis conn, String user, String title, String link) {
         String articleId = String.valueOf(conn.incr("article:"));
 
@@ -85,7 +85,7 @@ public class Chapter01 {
 
         return articleId;
     }
-
+    //某用户给指定的文章投票
     public void articleVote(Jedis conn, String user, String article) {
         long cutoff = (System.currentTimeMillis() / 1000) - ONE_WEEK_IN_SECONDS;
         if (conn.zscore("time:", article) < cutoff) {
@@ -99,7 +99,7 @@ public class Chapter01 {
         }
     }
 
-
+    //获取指定分页的所有文章，文章列表根据得分倒序
     public List<Map<String, String>> getArticles(Jedis conn, int page) {
         return getArticles(conn, page, "score:");
     }
