@@ -1,4 +1,4 @@
-package main.java.com.redis.redisinaction;
+package com.redis.redisinaction;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Pipeline;

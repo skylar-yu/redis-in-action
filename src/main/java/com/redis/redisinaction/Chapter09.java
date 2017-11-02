@@ -1,4 +1,4 @@
-package main.java.com.redis.redisinaction;
+package com.redis.redisinaction;
 
 import org.javatuples.Pair;
 import redis.clients.jedis.Jedis;

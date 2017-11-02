@@ -1,4 +1,4 @@
-package main.java.com.redis.redisinaction;
+package com.redis.redisinaction;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
