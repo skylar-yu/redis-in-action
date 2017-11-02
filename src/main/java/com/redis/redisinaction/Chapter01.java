@@ -33,8 +33,8 @@ public class Chapter01 {
      * 4、使用群组队文章进行分类
      */
     public void run() {
-        Jedis conn = new Jedis("172.21.107.126");
-        conn.select(15);
+        Jedis conn = new Jedis(Constants.REDIS_URL);
+        conn.select(1);
 
         String articleId = postArticle(
                 conn, "username", "A title", "http://www.google.com");
