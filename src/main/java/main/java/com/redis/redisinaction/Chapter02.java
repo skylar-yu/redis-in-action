@@ -252,8 +252,7 @@ public class Chapter02 {
         public String call(String request);
     }
 
-    public class CleanSessionsThread
-            extends Thread {
+    public class CleanSessionsThread extends Thread {
         private Jedis conn;
         private int limit;
         private boolean quit;
@@ -280,17 +279,20 @@ public class Chapter02 {
                     continue;
                 }
 
-                long endIndex = Math.min(size - limit, 100);
-                Set<String> tokenSet = conn.zrange("recent:", 0, endIndex - 1);
+                long endIndex = Math.min(size - limit, 100);   //获取需要移除的令牌ID, 每次删除不超过100条
+                Set<String> tokenSet = conn.zrange("recent:", 0, endIndex - 1); //recent: 有序集合中记录 token-timestamp 记录令牌最后一次出现的时间
                 String[] tokens = tokenSet.toArray(new String[tokenSet.size()]);
 
                 ArrayList<String> sessionKeys = new ArrayList<String>();
                 for (String token : tokens) {
-                    sessionKeys.add("viewed:" + token);
+                    sessionKeys.add("viewed:" + token);//viewed:token有序集合，timestamp-item 记录用户浏览过的商品
                 }
-
+                //删除某用户的会话：
+                // 1.需要删除该用户的浏览过的商品
                 conn.del(sessionKeys.toArray(new String[sessionKeys.size()]));
-                conn.hdel("login:", tokens);
+                //2.删除用户与token之间的映射关系
+                conn.hdel("login:", tokens);//login:hash,token-user,记录令牌与用户之间的映射关系
+                //3.删除用户对应token最近登录的时间
                 conn.zrem("recent:", tokens);
             }
         }
