@@ -288,11 +288,11 @@ public class Chapter02 {
                     sessionKeys.add("viewed:" + token);//viewed:token有序集合，timestamp-item 记录用户浏览过的商品
                 }
                 //删除某用户的会话：
-                // 1.需要删除该用户的浏览过的商品
+                // 1.需要删除该用户的浏览过的商品(zset)
                 conn.del(sessionKeys.toArray(new String[sessionKeys.size()]));
-                //2.删除用户与token之间的映射关系
-                conn.hdel("login:", tokens);//login:hash,token-user,记录令牌与用户之间的映射关系
-                //3.删除用户对应token最近登录的时间
+                //2.删除用户与token之间的映射关系(hash)
+                conn.hdel("login:", tokens);//login: hash,token-user,记录令牌与用户之间的映射关系
+                //3.删除用户对应token最近登录的时间(zset)
                 conn.zrem("recent:", tokens);
             }
         }
