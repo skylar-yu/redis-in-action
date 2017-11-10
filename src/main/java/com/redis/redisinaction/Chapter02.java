@@ -199,7 +199,7 @@ public class Chapter02 {
     }
 
     public String cacheRequest(Jedis conn, String request, Callback callback) {
-        if (!canCache(conn, request)) {
+        if (!canCache(conn, request)) {  //不能缓存，则直接调用回调函数
             return callback != null ? callback.call(request) : null;
         }
 
@@ -230,7 +230,7 @@ public class Chapter02 {
                 return false;
             }
             Long rank = conn.zrank("viewed:", itemId);
-            return rank != null && rank < 10000;
+            return rank != null && rank < 10000;   // 缓存最经常浏览的10000个商品页面
         } catch (MalformedURLException mue) {
             return false;
         }
@@ -343,6 +343,9 @@ public class Chapter02 {
         }
     }
 
+    /**
+     * 缓存数据行
+     */
     public class CacheRowsThread
             extends Thread {
         private Jedis conn;

@@ -18,7 +18,7 @@ public class Chapter01 {
      * 数据结构：
      *   *文章已投票用户集合（防止重复投票）set
      *   *文章的详情  hash
-     *   *文章发布时间集合  zset
+     *   *文章发布时间集合  zset  time: timestamp-article:articleId
      *   *文章得分集合   zset
      * 1、某用户新发布一篇文章、默认的投票数为1
      *     1.1  sadd
