@@ -97,15 +97,15 @@ public class Chapter04 {
     }
 
     public boolean listItem(
-            Jedis conn, String itemId, String sellerId, double price) {
+            Jedis conn, String itemId, String sellerId, double price) {   // 用户sellerId想要将itemId商品挂到market卖出price价钱
 
         String inventory = "inventory:" + sellerId;
         String item = itemId + '.' + sellerId;
         long end = System.currentTimeMillis() + 5000;
 
         while (System.currentTimeMillis() < end) {
-            conn.watch(inventory);
-            if (!conn.sismember(inventory, itemId)) {
+            conn.watch(inventory);  // 监视买主的库存集合
+            if (!conn.sismember(inventory, itemId)) {  // 买主的库存集合的itemId发生变化，不再属于该集合
                 conn.unwatch();
                 return false;
             }
@@ -125,20 +125,19 @@ public class Chapter04 {
     }
 
     public boolean purchaseItem(
-            Jedis conn, String buyerId, String itemId, String sellerId, double lprice) {
-
+            Jedis conn, String buyerId, String itemId, String sellerId, double lprice) {   //  hash users:userId中funds hincrbyfloat减少，set inventory:sellerId中sadd新增的商品，market zset中下架商品zrem
         String buyer = "users:" + buyerId;
         String seller = "users:" + sellerId;
         String item = itemId + '.' + sellerId;
         String inventory = "inventory:" + buyerId;
         long end = System.currentTimeMillis() + 10000;
 
-        while (System.currentTimeMillis() < end) {
-            conn.watch("market:", buyer);
+        while (System.currentTimeMillis() < end) {  //如果重试未超时
+            conn.watch("market:", buyer);   //对可变的进行监视，这里监视market中商品价格，buyer的可用金额
 
             double price = conn.zscore("market:", item);
             double funds = Double.parseDouble(conn.hget(buyer, "funds"));
-            if (price != lprice || price > funds) {
+            if (price != lprice || price > funds) {  //想要购买的item的price价格发生变化 or 买家的可用金额不足
                 conn.unwatch();
                 return false;
             }
