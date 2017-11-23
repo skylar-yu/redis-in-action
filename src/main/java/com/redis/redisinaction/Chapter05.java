@@ -30,7 +30,7 @@ public class Chapter05 {
         ISO_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
     }
 
-    public static final void main(String[] args)
+    public static final void main2(String[] args)
             throws InterruptedException {
         new Chapter05().run();
     }
@@ -241,24 +241,25 @@ public class Chapter05 {
         logCommon(conn, name, message, INFO, 5000);
     }
 
-    public void logCommon(
+    //http://dba10g.blog.51cto.com/764602/1853096/
+    public void logCommon(  //记录发生频率 common:${name}:${level} hash    按loglevel记录发生详情 recent:${name}:{loglevel} list
             Jedis conn, String name, String message, String severity, int timeout) {
-        String commonDest = "common:" + name + ':' + severity;
-        String startKey = commonDest + ":start";
+        String commonDest = "common:" + name + ':' + severity;  // common:test:error   2  - message1
+        String startKey = commonDest + ":start";                // common:test:error:start - 2017-11-20T10:00:00
         long end = System.currentTimeMillis() + timeout;
         while (System.currentTimeMillis() < end) {
             conn.watch(startKey);
-            String hourStart = ISO_FORMAT.format(new Date());
+            String hourStart = ISO_FORMAT.format(new Date());  //当前所处的小时数
             String existing = conn.get(startKey);
 
             Transaction trans = conn.multi();
-            if (existing != null && COLLATOR.compare(existing, hourStart) < 0) {
-                trans.rename(commonDest, commonDest + ":last");
-                trans.rename(startKey, commonDest + ":pstart");
+            if (existing != null && COLLATOR.compare(existing, hourStart) < 0) { //如果记录的是上一个小时的日志
+                trans.rename(commonDest, commonDest + ":last");          // common:test:error   2  - message1                 common:test:error:last   2  - message1
+                trans.rename(startKey, commonDest + ":pstart");          // common:test:error:start - 2017-11-20T10:00:00     common:test:error:pstart - 2017-11-20T10:00:00
                 trans.set(startKey, hourStart);
             }
 
-            trans.zincrby(commonDest, 1, message);
+            trans.zincrby(commonDest, 1, message); //日志计数器增1
 
             String recentDest = "recent:" + name + ':' + severity;
             trans.lpush(recentDest, TIMESTAMP.format(new Date()) + ' ' + message);
@@ -273,6 +274,13 @@ public class Chapter05 {
         }
     }
 
+    public static void main(String[] args) {
+        String hourStart = ISO_FORMAT.format(new Date());  //2017-11-20T09:00:00
+        String hourStart2 = ISO_FORMAT.format(new Date());  //2017-11-20T09:00:00
+        int compare = COLLATOR.compare(hourStart2, hourStart);
+        System.out.println(compare);
+        System.out.println(hourStart);
+    }
     public void updateCounter(Jedis conn, String name, int count) {
         updateCounter(conn, name, count, System.currentTimeMillis() / 1000);
     }

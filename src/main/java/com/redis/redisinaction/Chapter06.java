@@ -437,11 +437,11 @@ public class Chapter06 {
 
         long end = System.currentTimeMillis() + acquireTimeout;
         while (System.currentTimeMillis() < end) {
-            if (conn.setnx(lockKey, identifier) == 1) {
+            if (conn.setnx(lockKey, identifier) == 1) {   //如果成功获取到锁  设置过期时间
                 conn.expire(lockKey, lockExpire);
                 return identifier;
             }
-            if (conn.ttl(lockKey) == -1) {
+            if (conn.ttl(lockKey) == -1) {         //如果没有获取到锁，检查锁是否有过期时间，没有，设置过期时间。
                 conn.expire(lockKey, lockExpire);
             }
 
@@ -461,7 +461,7 @@ public class Chapter06 {
 
         while (true) {
             conn.watch(lockKey);
-            if (identifier.equals(conn.get(lockKey))) {
+            if (identifier.equals(conn.get(lockKey))) {     //防止释放其他客户端的锁
                 Transaction trans = conn.multi();
                 trans.del(lockKey);
                 List<Object> results = trans.exec();
