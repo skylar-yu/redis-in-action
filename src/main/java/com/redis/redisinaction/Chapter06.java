@@ -2,6 +2,7 @@ package com.redis.redisinaction;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.junit.Test;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.Transaction;
 import redis.clients.jedis.Tuple;
@@ -478,6 +479,13 @@ public class Chapter06 {
         return false;
     }
 
+    @Test
+    public void testAcquireSemaphore(){
+        Jedis conn = new Jedis(Constants.REDIS_URL);
+        conn.select(7);
+        String semName = acquireFairSemaphore(conn, "semName", 60, 3000);
+    }
+
     public String acquireFairSemaphore(
             Jedis conn, String semname, int limit, long timeout) {
         String identifier = UUID.randomUUID().toString();
@@ -486,6 +494,8 @@ public class Chapter06 {
 
         long now = System.currentTimeMillis();
         Transaction trans = conn.multi();
+        byte[] bytes = "-inf".getBytes();
+        byte[] bytes1 = String.valueOf(now - timeout).getBytes();
         trans.zremrangeByScore(
                 semname.getBytes(),
                 "-inf".getBytes(),
